@@ -5,13 +5,17 @@ import TourInfo from "./TourInfo";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createNewTour,
+  fetchUserTokensById,
   generateTourResponse,
   getExistingTour,
+  subtractTokens,
 } from "@/utils/action";
 import toast from "react-hot-toast";
+import { useAuth } from "@clerk/nextjs";
 
 const NewTour = () => {
   const queryClient = useQueryClient();
+  const { userId } = useAuth();
 
   const {
     mutate,
@@ -24,14 +28,22 @@ const NewTour = () => {
         return existingTour;
       }
 
-      const newTour = await generateTourResponse(destination);
-      if (newTour) {
-        await createNewTour(newTour);
-        queryClient.invalidateQueries({ queryKey: ["tours"] });
-        return newTour;
+      const currentTokens = await fetchUserTokensById(userId);
+      if (currentTokens < 300) {
+        toast.error("Tokens balance too low...");
+        return;
       }
-      toast.error("No matching city found...");
-      return null;
+
+      const newTour = await generateTourResponse(destination);
+      if (!newTour) {
+        toast.error("No matching city found...");
+        return null;
+      }
+      const response = await createNewTour(newTour.tour);
+      queryClient.invalidateQueries({ queryKey: ["tours"] });
+      const newTokens = await subtractTokens(userId, newTour.tokens);
+      toast.success(`${newTokens} tokens remaining...`);
+      return newTour.tour;
     },
   });
 
