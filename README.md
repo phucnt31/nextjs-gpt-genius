@@ -8,7 +8,7 @@
 
 - npm install
 
-- Set up the necessary environment variables for OpenAI, Clerk, and Prisma.
+- Set up the necessary environment variables for OpenAI, Clerk, and PlanetScale.
 
 ```sh
 - Clerk
@@ -25,7 +25,7 @@ UNSPLASH_API_KEY=
 
 Put all the necessary environment variables in .env.local
 
-- Prisma (put in .env file)
+- PlanetScale (put in .env file)
 DATABASE_URL=
 ```
 
